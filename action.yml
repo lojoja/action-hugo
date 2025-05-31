@@ -1,0 +1,47 @@
+name: Hugo
+description: Build a site with hugo.
+
+inputs:
+  hugo_environment:
+    description: The hugo build environment.
+    required: false
+    default: production
+  hugo_version:
+    description: The hugo version to use.
+    required: false
+    default: 0.145.0
+  sass:
+    description: Whether to install dart sass.
+    required: false
+    default: "false"
+  working_directory:
+    description: The directory to execute commands in.
+    required: false
+    default: "."
+
+outputs: {}
+
+runs:
+  using: composite
+  steps:
+    - name: Check out repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      if: ${{ inputs.checkout == 'true' }}
+
+    - name: Install hugo
+      run: |
+        wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${{ inputs.hugo_version }}/hugo_extended_${{ inputs.hugo_version }}_linux-amd64.deb \
+        && sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      shell: bash
+
+    - name: Install Dart Sass
+      if: ${{ inputs.sass == 'true' }}
+      run: sudo snap install dart-sass
+      shell: bash
+
+    - name: Run hugo
+      run: hugo --minify
+      shell: bash
+      working-directory: ${{ inputs.project_directory }}
+      env:
+        HUGO_ENVIRONMENT: ${{ inputs.hugo_environment }}

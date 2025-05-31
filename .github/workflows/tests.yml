@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  changes:
+    name: Identify changes
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.dedupe.outputs.should_skip }}
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Dedupe
+        id: dedupe
+        uses: lojoja/action-dedupe@main
+        with:
+          github_token: ${{ github.token }}
+          paths: |
+            - .github/workflows/tests.yml
+            - action.yml
+            - tests/*
+
+  test-hugo:
+    name: Test hugo
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.should_skip == 'false'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run hugo action
+        uses: ./
+        with:
+          hugo_environment: production
+          hugo_version: 0.145.0
+          working_directory: tests
+          sass: "true"
+
+  result:
+    name: Tests result
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - test-hugo
+    steps:
+      - name: Tests failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - name: Tests passed
+        run: exit 0
