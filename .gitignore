@@ -1,5 +1,7 @@
 !*
+*.lock
 *.sublime-workspace
 ._*
 .DS_Store
 node_modules/
+tests/public/
