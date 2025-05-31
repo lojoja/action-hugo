@@ -42,6 +42,6 @@ runs:
     - name: Run hugo
       run: hugo --minify
       shell: bash
-      working-directory: ${{ inputs.project_directory }}
+      working-directory: ${{ inputs.working_directory }}
       env:
         HUGO_ENVIRONMENT: ${{ inputs.hugo_environment }}
