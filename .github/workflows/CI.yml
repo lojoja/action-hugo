@@ -9,7 +9,7 @@ on:
 env:
   HUGO_ENVIRONMENT: production
   HUGO_VERSION: 0.145.0
-  NODE_VERSION: "22"
+  NODE_VERSION: "24"
 
 jobs:
   changes:
